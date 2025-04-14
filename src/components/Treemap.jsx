@@ -1,16 +1,15 @@
 import * as d3 from 'd3'
 import { useEffect, useRef } from 'react'
-import { renderRadialTree } from '../visualizations/radialTree'
+import { renderTreemap } from '../visualizations/treemap'
 
-const RadialTree = ({ data, width, height, searchQuery }) => {
+function Treemap({ data, width, height, searchQuery }) {
 	const svgRef = useRef(null)
-	const containerRef = useRef(null)
 
 	useEffect(() => {
 		if (!data || !svgRef.current) return
 
 		const svg = d3.select(svgRef.current)
-		renderRadialTree(svg, data, width, height, searchQuery)
+		renderTreemap(svg, data, width, height, searchQuery)
 
 		return () => {
 			svg.selectAll('*').remove()
@@ -27,4 +26,4 @@ const RadialTree = ({ data, width, height, searchQuery }) => {
 	)
 }
 
-export default RadialTree
+export default Treemap

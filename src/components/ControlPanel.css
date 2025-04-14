@@ -1,0 +1,143 @@
+.control-panel {
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	background: rgba(255, 255, 255, 0.95);
+	padding: 10px;
+	border-radius: 8px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+	min-width: 200px;
+	max-width: 250px;
+}
+
+.control-panel-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 10px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #eee;
+}
+
+.control-panel-header h2 {
+	margin: 0;
+	font-size: 16px;
+	color: #333;
+}
+
+.settings-toggle {
+	background: none;
+	border: none;
+	color: #4a90e2;
+	cursor: pointer;
+	font-size: 12px;
+	padding: 4px 8px;
+	border-radius: 4px;
+	transition: background-color 0.2s;
+}
+
+.settings-toggle:hover {
+	background-color: rgba(74, 144, 226, 0.1);
+}
+
+.control-panel-content {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.control-group {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.file-upload {
+	display: inline-block;
+	padding: 6px 10px;
+	background: #4a90e2;
+	color: white;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+	text-align: center;
+	font-size: 12px;
+}
+
+.file-upload:hover {
+	background: #357abd;
+}
+
+.file-upload input[type='file'] {
+	display: none;
+}
+
+.search-input {
+	padding: 6px 10px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 12px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.search-input:focus {
+	outline: none;
+	border-color: #4a90e2;
+}
+
+.visualization-select {
+	padding: 6px 10px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: white;
+	font-size: 12px;
+	cursor: pointer;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.visualization-select:hover {
+	border-color: #4a90e2;
+}
+
+.visualization-select:focus {
+	outline: none;
+	border-color: #4a90e2;
+}
+
+/* Стили для настроек дерева */
+
+.tree-settings {
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 1px solid #eee;
+}
+
+.setting-group {
+	margin-bottom: 8px;
+}
+
+.setting-group label {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	font-size: 12px;
+	color: #333;
+}
+
+.setting-group input[type='range'] {
+	width: 100%;
+	margin: 4px 0;
+}
+
+.setting-group input[type='checkbox'] {
+	margin-right: 6px;
+}
+
+.setting-group span {
+	font-size: 11px;
+	color: #666;
+	text-align: right;
+}

@@ -1,13 +1,38 @@
 import * as d3 from 'd3'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import './App.css'
-import InteractiveTree from './components/InteractiveTree'
+import ControlPanel from './components/ControlPanel'
+import { InteractiveTreeComponent } from './components/InteractiveTree'
 import RadialTree from './components/RadialTree'
 
 function App() {
 	const [data, setData] = useState(null)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [visualizationType, setVisualizationType] = useState('tree')
+	const [treeSettings, setTreeSettings] = useState({
+		nodeSize: 20,
+		nodeSpacing: 100,
+		levelHeight: 150,
+		showDetails: true,
+		highlightParents: true,
+		animationDuration: 500,
+	})
+	const [dimensions, setDimensions] = useState({
+		width: window.innerWidth,
+		height: window.innerHeight,
+	})
+
+	useEffect(() => {
+		const handleResize = () => {
+			setDimensions({
+				width: window.innerWidth,
+				height: window.innerHeight,
+			})
+		}
+
+		window.addEventListener('resize', handleResize)
+		return () => window.removeEventListener('resize', handleResize)
+	}, [])
 
 	const handleFileUpload = useCallback(event => {
 		const file = event.target.files[0]
@@ -60,51 +85,32 @@ function App() {
 		return root
 	}
 
-	const handleSearch = useCallback(event => {
-		setSearchQuery(event.target.value.toLowerCase())
-	}, [])
-
-	const handleVisualizationChange = useCallback(event => {
-		setVisualizationType(event.target.value)
-	}, [])
-
 	return (
-		<div className='app'>
-			<div className='controls'>
-				<input
-					type='file'
-					id='fileInput'
-					accept='.csv'
-					onChange={handleFileUpload}
-				/>
-				<input
-					type='text'
-					placeholder='Поиск...'
-					value={searchQuery}
-					onChange={handleSearch}
-				/>
-				<select value={visualizationType} onChange={handleVisualizationChange}>
-					<option value='tree'>Дерево</option>
-					<option value='radial'>Радиальное дерево</option>
-				</select>
-			</div>
-			<div className='visualization'>
-				{data &&
-					(visualizationType === 'tree' ? (
-						<InteractiveTree
-							data={data}
-							width={1000}
-							height={800}
-							searchQuery={searchQuery}
-						/>
-					) : (
-						<RadialTree
-							data={data}
-							width={1000}
-							height={800}
-							searchQuery={searchQuery}
-						/>
-					))}
+		<div className='App'>
+			<ControlPanel
+				onDataChange={setData}
+				onSearchQueryChange={setSearchQuery}
+				onVisualizationTypeChange={setVisualizationType}
+				onTreeSettingsChange={setTreeSettings}
+			/>
+			<div className='visualization-container'>
+				{visualizationType === 'tree' ? (
+					<InteractiveTreeComponent
+						data={data}
+						width={dimensions.width}
+						height={dimensions.height}
+						searchQuery={searchQuery}
+						settings={treeSettings}
+					/>
+				) : (
+					<RadialTree
+						data={data}
+						width={dimensions.width}
+						height={dimensions.height}
+						searchQuery={searchQuery}
+						settings={treeSettings}
+					/>
+				)}
 			</div>
 		</div>
 	)

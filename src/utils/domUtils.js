@@ -1,0 +1,153 @@
+import * as d3 from 'd3'
+import { TREE_CONFIG } from '../constants/treeConfig'
+
+export class DOMUtils {
+    /**
+     * Создает контейнер для визуализации с поддержкой зумирования
+     * @param {d3.Selection} svg - SVG элемент
+     * @param {number} width - Ширина
+     * @param {number} height - Высота
+     * @param {Object} margin - Отступы
+     * @returns {d3.Selection} Контейнер
+     */
+    static createZoomContainer(svg, width, height, margin) {
+        return svg
+            .append('g')
+            .attr('width', width)
+            .attr('height', height)
+            .attr('transform', `translate(${margin.left},${margin.top})`)
+    }
+
+    /**
+     * Очищает SVG, сохраняя контейнер зумирования
+     * @param {d3.Selection} svg - SVG элемент
+     */
+    static clearSVG(svg) {
+        svg.selectAll('*').remove()
+    }
+
+    /**
+     * Создает базовый узел с обработчиками событий
+     * @param {d3.Selection} enter - Selection для входа
+     * @param {Function} onClick - Обработчик клика
+     * @param {Function} onMouseOver - Обработчик наведения
+     * @param {Function} onMouseOut - Обработчик ухода курсора
+     * @returns {d3.Selection} Узел
+     */
+    static createBaseNode(enter, onClick, onMouseOver, onMouseOut) {
+        return enter
+            .append('g')
+            .attr('class', d => `node ${d._children ? 'collapsed' : ''}`)
+            .on('click', onClick)
+            .on('mouseover', onMouseOver)
+            .on('mouseout', onMouseOut)
+    }
+
+    static calculateNodeWidth(text, settings = TREE_CONFIG) {
+        // Создаем временный элемент для измерения текста
+        const tempText = document.createElement('span')
+        tempText.style.font = `14px Arial, sans-serif` // Такой же шрифт как у узлов
+        tempText.style.visibility = 'hidden'
+        tempText.style.position = 'absolute'
+        tempText.textContent = text
+        document.body.appendChild(tempText)
+
+        // Получаем ширину текста и добавляем отступы
+        const textWidth = tempText.offsetWidth
+        document.body.removeChild(tempText)
+
+        // Минимальная ширина узла + отступы по бокам
+        return Math.max(settings.nodeSize.width, textWidth + 40)
+    }
+
+    /**
+     * Создает прямоугольник для узла
+     * @param {d3.Selection} selection - Узел
+     * @param {Object} d - Данные
+     * @param {string} searchQuery - Поисковый запрос
+     * @param {Object} settings - Настройки
+     */
+    static createNodeRect(selection, d, searchQuery, settings = TREE_CONFIG) {
+        // Вычисляем ширину узла на основе текста
+        const nodeWidth = this.calculateNodeWidth(d.data.name, settings)
+
+        const rect = selection
+            .append('rect')
+            .attr('width', nodeWidth)
+            .attr('height', settings.nodeSize.height)
+            .attr('rx', settings.nodeSize.borderRadius)
+            .attr('ry', settings.nodeSize.borderRadius)
+            .attr('fill', settings.colors.node.background)
+            .attr('stroke', settings.colors.node.border)
+            .attr('stroke-width', 2)
+
+        // Применяем стили в зависимости от состояния узла
+        if (d._children) {
+            rect
+                .attr('fill', settings.colors.node.collapsed.background)
+                .attr('stroke', settings.colors.node.collapsed.border)
+        } else if (selection.classed('highlight')) {
+            rect
+                .attr('fill', settings.colors.node.highlight.background)
+                .attr('stroke', settings.colors.node.highlight.border)
+        }
+
+        if (this.isHighlighted(d, searchQuery)) {
+            rect
+                .attr('fill', settings.colors.node.highlight.background)
+                .attr('stroke', settings.colors.node.highlight.border)
+        }
+
+        // Сохраняем ширину узла в данных для использования при отрисовке связей
+        d.nodeWidth = nodeWidth
+
+        return rect
+    }
+
+    /**
+     * Создает текст для узла
+     * @param {d3.Selection} selection - Узел
+     * @param {Object} d - Данные
+     * @param {string} searchQuery - Поисковый запрос
+     * @param {Object} settings - Настройки
+     */
+    static createNodeText(selection, d, searchQuery, settings = TREE_CONFIG) {
+        const nodeWidth =
+            d.nodeWidth || this.calculateNodeWidth(d.data.name, settings)
+
+        const text = selection
+            .append('text')
+            .attr('dy', '0.35em')
+            .attr('x', nodeWidth / 2)
+            .attr('y', settings.nodeSize.height / 2)
+            .attr('text-anchor', 'middle')
+            .attr('fill', settings.colors.node.text)
+            .style('font-size', '14px')
+            .style('font-family', 'Arial, sans-serif')
+            .text(d.data.name)
+
+        // Применяем стили в зависимости от состояния узла
+        if (d._children) {
+            text
+                .attr('fill', settings.colors.node.collapsed.text)
+                .style('font-weight', 'bold')
+        } else if (selection.classed('highlight')) {
+            text
+                .attr('fill', settings.colors.node.highlight.text)
+                .style('font-weight', 'bold')
+        }
+
+        if (this.isHighlighted(d, searchQuery)) {
+            text
+                .attr('fill', settings.colors.node.highlight.text)
+                .style('font-weight', 'bold')
+        }
+
+        return text
+    }
+
+    static isHighlighted(d, searchQuery) {
+        if (!searchQuery) return false
+        return d.data.name.toLowerCase().includes(searchQuery.toLowerCase())
+    }
+}
