@@ -20,8 +20,24 @@ export class InteractiveTree {
 		this.searchQuery = searchQuery
 		this.margin = margin
 		this.settings = { ...TREE_CONFIG, ...settings }
+		this.currentPath = null
+		this.onPathChange = null
 
 		this.init()
+	}
+
+	setOnPathChange(callback) {
+		this.onPathChange = callback
+	}
+
+	getPathToNode(node) {
+		const path = []
+		let current = node
+		while (current) {
+			path.unshift(current)
+			current = current.parent
+		}
+		return path
 	}
 
 	init() {
@@ -243,49 +259,67 @@ export class InteractiveTree {
 
 	handleNodeMouseOver(event, d) {
 		d3.select(event.currentTarget).classed('highlight', true)
+		this.highlightPath(d)
 		this.highlightParents(d)
-		this.highlightLink(d)
+
+		// Обновляем путь и вызываем callback
+		this.currentPath = this.getPathToNode(d)
+		if (this.onPathChange) {
+			this.onPathChange(this.currentPath)
+		}
 	}
 
 	handleNodeMouseOut(event, d) {
 		d3.select(event.currentTarget).classed('highlight', false)
+		this.unhighlightPath(d)
 		this.unhighlightParents(d)
-		this.unhighlightLink(d)
+
+		// Очищаем путь
+		this.currentPath = null
+		if (this.onPathChange) {
+			this.onPathChange(null)
+		}
+	}
+
+	highlightPath(d) {
+		const path = this.getPathToNode(d)
+		path.forEach(node => {
+			this.nodeGroup
+				.selectAll('g')
+				.filter(n => n === node)
+				.classed('path-highlight', true)
+		})
+	}
+
+	unhighlightPath(d) {
+		const path = this.getPathToNode(d)
+		path.forEach(node => {
+			this.nodeGroup
+				.selectAll('g')
+				.filter(n => n === node)
+				.classed('path-highlight', false)
+		})
 	}
 
 	highlightParents(d) {
-		let parent = d.parent
-		while (parent) {
-			d3.select(`[data-id="${parent.data.id}"]`).classed('highlight', true)
-			parent = parent.parent
+		let current = d.parent
+		while (current) {
+			this.nodeGroup
+				.selectAll('g')
+				.filter(n => n === current)
+				.classed('parent-highlight', true)
+			current = current.parent
 		}
 	}
 
 	unhighlightParents(d) {
-		let parent = d.parent
-		while (parent) {
-			d3.select(`[data-id="${parent.data.id}"]`).classed('highlight', false)
-			parent = parent.parent
-		}
-	}
-
-	highlightLink(d) {
-		if (d.parent) {
-			this.linkGroup
-				.selectAll('path')
-				.filter(link => link.source === d.parent && link.target === d)
-				.attr('stroke', this.settings.colors.linkHighlight)
-				.attr('stroke-width', '3px')
-		}
-	}
-
-	unhighlightLink(d) {
-		if (d.parent) {
-			this.linkGroup
-				.selectAll('path')
-				.filter(link => link.source === d.parent && link.target === d)
-				.attr('stroke', this.settings.colors.link)
-				.attr('stroke-width', '2px')
+		let current = d.parent
+		while (current) {
+			this.nodeGroup
+				.selectAll('g')
+				.filter(n => n === current)
+				.classed('parent-highlight', false)
+			current = current.parent
 		}
 	}
 

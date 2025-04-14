@@ -46,6 +46,11 @@ export const TREE_CONFIG = {
                 border: '#4a90e2',
                 text: '#4a90e2',
             },
+            path: {
+                background: '#ffffff',
+                border: '#4a90e2',
+                text: '#4a90e2',
+            },
             collapsed: {
                 background: '#f0f9ff',
                 border: '#4a90e2',

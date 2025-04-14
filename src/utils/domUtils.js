@@ -77,25 +77,15 @@ export class DOMUtils {
             .attr('height', settings.nodeSize.height)
             .attr('rx', settings.nodeSize.borderRadius)
             .attr('ry', settings.nodeSize.borderRadius)
-            .attr('fill', settings.colors.node.background)
-            .attr('stroke', settings.colors.node.border)
-            .attr('stroke-width', 2)
+            .attr('class', 'node-rect')
 
-        // Применяем стили в зависимости от состояния узла
+        // Добавляем классы в зависимости от состояния узла
         if (d._children) {
-            rect
-                .attr('fill', settings.colors.node.collapsed.background)
-                .attr('stroke', settings.colors.node.collapsed.border)
-        } else if (selection.classed('highlight')) {
-            rect
-                .attr('fill', settings.colors.node.highlight.background)
-                .attr('stroke', settings.colors.node.highlight.border)
+            rect.classed('collapsed', true)
         }
 
         if (this.isHighlighted(d, searchQuery)) {
-            rect
-                .attr('fill', settings.colors.node.highlight.background)
-                .attr('stroke', settings.colors.node.highlight.border)
+            rect.classed('search-highlight', true)
         }
 
         // Сохраняем ширину узла в данных для использования при отрисовке связей
@@ -121,26 +111,16 @@ export class DOMUtils {
             .attr('x', nodeWidth / 2)
             .attr('y', settings.nodeSize.height / 2)
             .attr('text-anchor', 'middle')
-            .attr('fill', settings.colors.node.text)
-            .style('font-size', '14px')
-            .style('font-family', 'Arial, sans-serif')
+            .attr('class', 'node-text')
             .text(d.data.name)
 
-        // Применяем стили в зависимости от состояния узла
+        // Добавляем классы в зависимости от состояния узла
         if (d._children) {
-            text
-                .attr('fill', settings.colors.node.collapsed.text)
-                .style('font-weight', 'bold')
-        } else if (selection.classed('highlight')) {
-            text
-                .attr('fill', settings.colors.node.highlight.text)
-                .style('font-weight', 'bold')
+            text.classed('collapsed', true)
         }
 
         if (this.isHighlighted(d, searchQuery)) {
-            text
-                .attr('fill', settings.colors.node.highlight.text)
-                .style('font-weight', 'bold')
+            text.classed('search-highlight', true)
         }
 
         return text
