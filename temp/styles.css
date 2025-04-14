@@ -1,0 +1,209 @@
+/* Общие стили */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    overflow: hidden;
+}
+
+#controls {
+    margin-bottom: 20px;
+}
+
+#vizContainer,
+#minimapContainer {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+
+/* Стили для интерактивного дерева */
+
+.node {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 2px solid #999;
+    transition: all 0.2s ease-in-out;
+    background: #fff;
+    padding: 8px 12px;
+    min-width: 50px;
+    min-height: 30px;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.node text {
+    font: 12px sans-serif;
+    dominant-baseline: middle;
+    text-anchor: middle;
+    pointer-events: none;
+    user-select: none;
+}
+
+.node:hover {
+    border-color: #4a90e2;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.node.highlight {
+    border-color: #ff9800 !important;
+    box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+}
+
+.node.collapsed {
+    background: #e6f3ff;
+    border-color: #4a90e2;
+}
+
+.node.collapsed::after {
+    content: '+';
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #4a90e2;
+    font-weight: bold;
+}
+
+.node:not(.collapsed)::after {
+    content: '-';
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #4a90e2;
+    font-weight: bold;
+}
+
+
+/* Стили для связей */
+
+.link {
+    fill: none;
+    stroke: #999;
+    stroke-width: 2px;
+    opacity: 0.6;
+    transition: all 0.2s ease-in-out;
+}
+
+.link:hover {
+    stroke: #4a90e2;
+    stroke-width: 3px;
+    opacity: 1;
+}
+
+
+/* Стили для треемпа */
+
+.treemap-cell {
+    stroke: #fff;
+    transition: all 0.2s ease-in-out;
+}
+
+.treemap-cell text {
+    font: 12px sans-serif;
+    dominant-baseline: middle;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+.treemap-cell.highlight {
+    fill: #ffeb3b;
+    stroke: #ff9800;
+}
+
+
+/* Стили для зумирования */
+
+.zoom-container {
+    cursor: move;
+}
+
+
+/* Стили для карточек */
+
+.card {
+    display: inline-block;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 5px;
+    min-width: 150px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Стили для поиска */
+
+.search-highlight {
+    fill: red;
+}
+
+.nodeCircle {
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
+.highlight {
+    /* stroke: orange; */
+    /* stroke-width: 3px; */
+}
+
+.highlight>rect {
+    stroke: orange !important;
+}
+
+.node circle {
+    fill: #fff;
+    stroke: #999;
+    stroke-width: 2px;
+}
+
+.node circle.highlight {
+    fill: #ffeb3b;
+    stroke: #ff9800;
+}
+
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1.5px;
+}
+
+
+/* Стили для адаптивных нодов */
+
+.nodeCircle {
+    transition: r 0.2s ease-in-out;
+}
+
+.node text {
+    pointer-events: none;
+    user-select: none;
+}
+
+
+/* Стили для радиального дерева */
+
+.radial-node circle {
+    fill: #fff;
+    stroke: #999;
+    stroke-width: 2px;
+}
+
+.radial-node text {
+    font: 12px sans-serif;
+    dominant-baseline: middle;
+    text-anchor: middle;
+}
+
+.radial-link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1.5px;
+}
