@@ -1,0 +1,10 @@
+.found rect {
+    stroke: #ff9800 !important;
+    stroke-width: 4px !important;
+    fill: #fff3e0 !important;
+}
+
+.found text {
+    fill: #ff9800 !important;
+    font-weight: bold;
+}

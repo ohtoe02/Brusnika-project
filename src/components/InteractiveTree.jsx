@@ -1,6 +1,7 @@
 import * as d3 from 'd3'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { TREE_CONFIG } from '../constants/treeConfig'
+import '../styles/foundHighlight.css'
 import { InteractiveTree } from '../visualizations/interactiveTree'
 import { MiniMap } from './MiniMap'
 
@@ -47,28 +48,26 @@ export const InteractiveTreeComponent = ({
 		const margin = { top: 20, right: 20, bottom: 20, left: 20 }
 		const svg = d3.select(svgRef.current)
 
-		// Создаем новый экземпляр InteractiveTree с mergedSettings
+		// Создаем новый экземпляр InteractiveTree только при изменении данных или размеров
 		treeRef.current = new InteractiveTree(
 			svg,
 			data,
 			width - margin.left - margin.right,
 			height - margin.top - margin.bottom,
-			searchQuery,
+			'',
 			margin,
 			mergedSettings
 		)
 
-		// Устанавливаем callback для обновления пути
+		// Сохраняем ссылку глобально для поиска
+		window.interactiveTreeInstance = treeRef.current
+
 		treeRef.current.setOnPathChange(setCurrentPath)
 
-		// Получаем контейнер масштабирования из InteractiveTree
 		const zoomContainer = svg.select('.zoom-container')
-
-		// Создаем сетку внутри контейнера масштабирования
 		const gridSize = 50
 		const gridGroup = zoomContainer.append('g').attr('class', 'grid').lower()
 
-		// Создаем горизонтальные линии
 		for (let y = -height; y < height * 2; y += gridSize) {
 			gridGroup
 				.append('line')
@@ -80,7 +79,6 @@ export const InteractiveTreeComponent = ({
 				.attr('stroke-width', 1)
 		}
 
-		// Создаем вертикальные линии
 		for (let x = -width; x < width * 2; x += gridSize) {
 			gridGroup
 				.append('line')
@@ -93,12 +91,12 @@ export const InteractiveTreeComponent = ({
 		}
 
 		return () => {
-			// Очищаем при размонтировании
 			if (treeRef.current) {
 				treeRef.current.cleanup()
 			}
+			window.interactiveTreeInstance = null
 		}
-	}, [data, width, height, searchQuery, mergedSettings])
+	}, [data, width, height, mergedSettings])
 
 	// Добавить useEffect для обновления настроек без ререндера
 	useEffect(() => {

@@ -419,6 +419,19 @@ const ControlPanel = ({
 								onChange={e => onSearchQueryChange(e.target.value)}
 								placeholder='Поиск...'
 								className='search-input'
+								onKeyDown={e => {
+									if (e.key === 'Enter' && e.target.value.trim()) {
+										console.log(
+											'[ControlPanel] Поиск по:',
+											e.target.value.trim()
+										)
+										if (window.interactiveTreeInstance) {
+											window.interactiveTreeInstance.revealPathToNode(
+												e.target.value.trim()
+											)
+										}
+									}
+								}}
 							/>
 						</div>
 						<div className='control-group'>
@@ -427,8 +440,7 @@ const ControlPanel = ({
 								className='visualization-select'
 							>
 								<option value='tree'>Древовидная</option>
-								<option value='radial'>Радиальная</option>
-								<option value='network'>Network (vis-network)</option>
+								<option value='network'>Network (vis-network) - TEST</option>
 							</select>
 						</div>
 						<div className='settings-section'>
