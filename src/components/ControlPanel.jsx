@@ -444,7 +444,7 @@ const ControlPanel = ({
 							</select>
 						</div>
 						<div className='settings-section'>
-							<div className='settings-header'>
+							{/* <div className='settings-header'>
 								<h3 className='settings-title'>Настройки дерева</h3>
 							</div>
 							<div className='settings-tabs'>
@@ -461,7 +461,7 @@ const ControlPanel = ({
 									</div>
 								))}
 							</div>
-							<div className='settings-content'>{renderContent()}</div>
+							<div className='settings-content'>{renderContent()}</div> */}
 						</div>
 					</div>
 				)}

@@ -1,5 +1,6 @@
 import * as d3 from 'd3'
 import { useCallback, useEffect, useState } from 'react'
+import { FiSearch } from 'react-icons/fi'
 import './App.css'
 import ControlPanel from './components/ControlPanel'
 import { InteractiveTreeComponent } from './components/InteractiveTree'
@@ -67,6 +68,8 @@ function App() {
 		width: window.innerWidth,
 		height: window.innerHeight,
 	})
+	const [showSearchBar, setShowSearchBar] = useState(false)
+	const [searchValue, setSearchValue] = useState('')
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -90,6 +93,30 @@ function App() {
 			}
 		}
 	}, [data])
+
+	// Добавляю useEffect для появления поиска при вводе любого текста
+	useEffect(() => {
+		const handler = e => {
+			const tag = (e.target.tagName || '').toLowerCase()
+			const isInput =
+				tag === 'input' ||
+				tag === 'textarea' ||
+				tag === 'select' ||
+				e.target.isContentEditable
+			if (isInput) return
+			if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+				e.preventDefault()
+				setShowSearchBar(true)
+				setSearchValue(prev => (prev ? prev + e.key : e.key))
+				setTimeout(() => {
+					const el = document.querySelector('.float-search-input')
+					if (el) el.focus()
+				}, 0)
+			}
+		}
+		document.addEventListener('keydown', handler)
+		return () => document.removeEventListener('keydown', handler)
+	}, [])
 
 	const handleFileUpload = useCallback(event => {
 		const file = event.target.files[0]
@@ -167,6 +194,43 @@ function App() {
 
 	return (
 		<div className='App'>
+			{/* Иконка поиска */}
+			<button
+				className='float-search-btn'
+				onClick={() => setShowSearchBar(true)}
+				title='Поиск'
+			>
+				<FiSearch size={22} color='#3498db' />
+			</button>
+			{/* Float-поле поиска */}
+			{showSearchBar && (
+				<div className='float-search-bar'>
+					<input
+						autoFocus
+						className='float-search-input'
+						placeholder='Поиск по дереву...'
+						value={searchValue}
+						onChange={e => setSearchValue(e.target.value)}
+						onKeyDown={e => {
+							if (e.key === 'Enter' && searchValue.trim()) {
+								if (window.interactiveTreeInstance) {
+									window.interactiveTreeInstance.revealPathToNode(
+										searchValue.trim()
+									)
+								}
+								setSearchValue('')
+								setShowSearchBar(false)
+							}
+							if (e.key === 'Escape') {
+								setShowSearchBar(false)
+							}
+						}}
+					/>
+					<span className='float-search-icon'>
+						<FiSearch size={22} color='#3498db' />
+					</span>
+				</div>
+			)}
 			<ControlPanel
 				data={data}
 				onDataChange={setData}
@@ -182,6 +246,10 @@ function App() {
 						height={dimensions.height}
 						searchQuery={searchQuery}
 						settings={treeSettings}
+						showSearchBar={showSearchBar}
+						setShowSearchBar={setShowSearchBar}
+						searchValue={searchValue}
+						setSearchValue={setSearchValue}
 					/>
 				) : visualizationType === 'radial' ? (
 					<RadialTree
@@ -195,7 +263,6 @@ function App() {
 					<VisNetwork data={networkData} options={networkOptions} />
 				)}
 			</div>
-			{/* <VisNetwork data={networkData} options={networkOptions} /> */}
 		</div>
 	)
 }
