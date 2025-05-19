@@ -91,6 +91,7 @@ export class InteractiveTree {
                 d.children = null
             }
         })
+        this.restoreTreeState()
     }
 
     createTreeLayout() {
@@ -120,6 +121,7 @@ export class InteractiveTree {
         this.updateZoom(newScale)
         this.updateLinks(treeData)
         this.updateNodes(treeData)
+        this.saveTreeState()
     }
 
     updateZoom(newScale) {
@@ -387,5 +389,60 @@ export class InteractiveTree {
                 this.nodeGroup.selectAll('g').classed('found', false)
             }, 2000)
         }, 100)
+    }
+
+    // Сохраняет массив путей раскрытых узлов в localStorage
+    saveTreeState() {
+        if (!this.root) return
+        const opened = []
+
+        function traverse(node, path) {
+            if (node.children && node.children.length > 0) {
+                opened.push([...path, node.data.name])
+                node.children.forEach(child =>
+                    traverse(child, [...path, node.data.name])
+                )
+            }
+            if (node._children && node._children.length > 0) {
+                node._children.forEach(child =>
+                    traverse(child, [...path, node.data.name])
+                )
+            }
+        }
+        traverse(this.root, [])
+        try {
+            localStorage.setItem('treeOpenedPaths', JSON.stringify(opened))
+        } catch (e) {
+            /* ignore */
+        }
+    }
+
+    // Восстанавливает раскрытие узлов по сохранённым путям
+    restoreTreeState() {
+        let opened = []
+        try {
+            opened = JSON.parse(localStorage.getItem('treeOpenedPaths')) || []
+        } catch (e) {
+            opened = []
+        }
+        if (!opened.length) return
+
+        function openByPaths(node, path) {
+            const currentPath = [...path, node.data.name]
+            const shouldOpen = opened.some(
+                openedPath => JSON.stringify(openedPath) === JSON.stringify(currentPath)
+            )
+            if (shouldOpen && node._children) {
+                node.children = node._children
+                node._children = null
+            }
+            if (node.children) {
+                node.children.forEach(child => openByPaths(child, currentPath))
+            }
+            if (node._children) {
+                node._children.forEach(child => openByPaths(child, currentPath))
+            }
+        }
+        openByPaths(this.root, [])
     }
 }

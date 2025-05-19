@@ -51,7 +51,15 @@ function mapTreeSettingsToVisOptions(settings) {
 }
 
 function App() {
-	const [data, setData] = useState(null)
+	// При инициализации читаем data из localStorage
+	const [data, setData] = useState(() => {
+		try {
+			const saved = localStorage.getItem('treeData')
+			return saved ? JSON.parse(saved) : null
+		} catch (e) {
+			return null
+		}
+	})
 	const [searchQuery, setSearchQuery] = useState('')
 	const [visualizationType, setVisualizationType] = useState('tree')
 	const [treeSettings, setTreeSettings] = useState(TREE_CONFIG)
@@ -71,6 +79,17 @@ function App() {
 		window.addEventListener('resize', handleResize)
 		return () => window.removeEventListener('resize', handleResize)
 	}, [])
+
+	// Сохраняем data в localStorage при каждом изменении
+	useEffect(() => {
+		if (data) {
+			try {
+				localStorage.setItem('treeData', JSON.stringify(data))
+			} catch (e) {
+				/* ignore */
+			}
+		}
+	}, [data])
 
 	const handleFileUpload = useCallback(event => {
 		const file = event.target.files[0]
