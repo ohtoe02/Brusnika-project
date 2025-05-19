@@ -28,11 +28,17 @@ export const MiniMap = ({ path }) => {
 					<div key={rowIndex} className='mini-map-row'>
 						{row.map((node, index) => (
 							<>
-								<div key={node.data.id} className='mini-map-node'>
+								<div
+									key={node.data.id || `${rowIndex}-${index}`}
+									className='mini-map-node'
+								>
 									{node.data.name}
 								</div>
 								{index < row.length - 1 && (
-									<div className='mini-map-connector' />
+									<div
+										key={`connector-${rowIndex}-${index}`}
+										className='mini-map-connector'
+									/>
 								)}
 							</>
 						))}

@@ -4,19 +4,57 @@ import './App.css'
 import ControlPanel from './components/ControlPanel'
 import { InteractiveTreeComponent } from './components/InteractiveTree'
 import RadialTree from './components/RadialTree'
+import VisNetwork from './components/VisNetwork'
+import { TREE_CONFIG } from './constants/treeConfig'
+
+// Глубокое слияние объектов
+function deepMerge(target, source) {
+	const output = { ...target }
+	if (typeof target === 'object' && typeof source === 'object') {
+		for (const key in source) {
+			if (
+				source[key] &&
+				typeof source[key] === 'object' &&
+				!Array.isArray(source[key])
+			) {
+				output[key] = deepMerge(target[key] || {}, source[key])
+			} else {
+				output[key] = source[key]
+			}
+		}
+	}
+	return output
+}
+
+// Маппинг treeSettings -> options для vis-network
+function mapTreeSettingsToVisOptions(settings) {
+	return {
+		nodes: {
+			color: settings.nodeColor || '#3498db',
+			font: {
+				color: settings.labelColor || '#2c3e50',
+				size: settings.labelSize || 12,
+			},
+			size: settings.nodeSize?.width || 25,
+		},
+		edges: {
+			color: settings.lineColor || '#95a5a6',
+			width: settings.lineWidth || 2,
+		},
+		layout: {
+			improvedLayout: true,
+		},
+		physics: {
+			enabled: true,
+		},
+	}
+}
 
 function App() {
 	const [data, setData] = useState(null)
 	const [searchQuery, setSearchQuery] = useState('')
 	const [visualizationType, setVisualizationType] = useState('tree')
-	const [treeSettings, setTreeSettings] = useState({
-		nodeSize: 20,
-		nodeSpacing: 100,
-		levelHeight: 150,
-		showDetails: true,
-		highlightParents: true,
-		animationDuration: 500,
-	})
+	const [treeSettings, setTreeSettings] = useState(TREE_CONFIG)
 	const [dimensions, setDimensions] = useState({
 		width: window.innerWidth,
 		height: window.innerHeight,
@@ -85,13 +123,37 @@ function App() {
 		return root
 	}
 
+	// Обновление настроек с глубоким слиянием
+	const handleTreeSettingsChange = newSettings => {
+		setTreeSettings(prev => deepMerge(prev, newSettings))
+	}
+
+	// Пример данных для vis-network (можно заменить на реальные)
+	const networkData = {
+		nodes: [
+			{ id: 1, label: 'Node 1' },
+			{ id: 2, label: 'Node 2' },
+			{ id: 3, label: 'Node 3' },
+			{ id: 4, label: 'Node 4' },
+			{ id: 5, label: 'Node 5' },
+		],
+		edges: [
+			{ from: 1, to: 3 },
+			{ from: 1, to: 2 },
+			{ from: 2, to: 4 },
+			{ from: 2, to: 5 },
+		],
+	}
+	const networkOptions = mapTreeSettingsToVisOptions(treeSettings)
+
 	return (
 		<div className='App'>
 			<ControlPanel
+				data={data}
 				onDataChange={setData}
 				onSearchQueryChange={setSearchQuery}
 				onVisualizationTypeChange={setVisualizationType}
-				onTreeSettingsChange={setTreeSettings}
+				onTreeSettingsChange={handleTreeSettingsChange}
 			/>
 			<div className='visualization-container'>
 				{visualizationType === 'tree' ? (
@@ -102,7 +164,7 @@ function App() {
 						searchQuery={searchQuery}
 						settings={treeSettings}
 					/>
-				) : (
+				) : visualizationType === 'radial' ? (
 					<RadialTree
 						data={data}
 						width={dimensions.width}
@@ -110,8 +172,11 @@ function App() {
 						searchQuery={searchQuery}
 						settings={treeSettings}
 					/>
+				) : (
+					<VisNetwork data={networkData} options={networkOptions} />
 				)}
 			</div>
+			{/* <VisNetwork data={networkData} options={networkOptions} /> */}
 		</div>
 	)
 }

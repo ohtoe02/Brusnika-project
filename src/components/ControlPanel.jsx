@@ -1,5 +1,5 @@
 import * as d3 from 'd3'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './ControlPanel.css'
 
 // Иконки для вкладок
@@ -34,18 +34,128 @@ const SettingsIcon = () => (
 	</svg>
 )
 
+// Модальное окно приветствия с drag&drop и загрузкой CSV
+const WelcomeModal = ({ onFileLoaded }) => {
+	const dropRef = useRef(null)
+	const [dragActive, setDragActive] = useState(false)
+
+	const handleDrag = e => {
+		e.preventDefault()
+		e.stopPropagation()
+		if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true)
+		else if (e.type === 'dragleave') setDragActive(false)
+	}
+
+	const handleDrop = e => {
+		e.preventDefault()
+		e.stopPropagation()
+		setDragActive(false)
+		if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+			handleFile(e.dataTransfer.files[0])
+		}
+	}
+
+	const handleFile = file => {
+		const reader = new FileReader()
+		reader.onload = e => {
+			const csvData = e.target.result
+			const parsedData = d3.csvParse(csvData)
+			const hierarchyData = buildHierarchy(parsedData)
+			onFileLoaded(hierarchyData)
+		}
+		reader.readAsText(file, 'UTF-8')
+	}
+
+	const handleInputChange = e => {
+		if (e.target.files && e.target.files[0]) {
+			handleFile(e.target.files[0])
+		}
+	}
+
+	// buildHierarchy скопирован из ControlPanel
+	const buildHierarchy = flatData => {
+		const root = { name: 'Сотрудники', children: [] }
+		const levels = [
+			'ЮЛ',
+			'Локация',
+			'Подразделение',
+			'Отдел',
+			'Группа',
+			'Должность',
+			'ФИО',
+		]
+		flatData.forEach(row => {
+			let current = root
+			levels.forEach(level => {
+				let value = row[level] ? row[level].trim() : ''
+				if (!value) return
+				let child = current.children.find(d => d.name === value)
+				if (!child) {
+					child = { name: value, children: [] }
+					current.children.push(child)
+				}
+				current = child
+			})
+			current.details = {
+				'Номер позиции': row['Номер позиции'],
+				'Тип работы': row['Тип работы'],
+			}
+		})
+		return root
+	}
+
+	return (
+		<div
+			className={`welcome-modal${dragActive ? ' drag-active' : ''}`}
+			onDragEnter={handleDrag}
+		>
+			<div
+				className='welcome-modal-content'
+				onDragEnter={handleDrag}
+				onDragLeave={handleDrag}
+				onDragOver={handleDrag}
+				onDrop={handleDrop}
+				ref={dropRef}
+			>
+				<div className='welcome-modal-icon'>
+					<svg width='64' height='64' fill='none' viewBox='0 0 64 64'>
+						<rect width='64' height='64' rx='16' fill='#e6f3ff' />
+						<path
+							d='M32 44V20M32 20l-8 8M32 20l8 8'
+							stroke='#3498db'
+							strokeWidth='3'
+							strokeLinecap='round'
+							strokeLinejoin='round'
+						/>
+					</svg>
+				</div>
+				<h2>Загрузите CSV-файл с иерархией</h2>
+				<p>Перетащите файл сюда или выберите вручную</p>
+				<label className='welcome-modal-upload-btn'>
+					<input
+						type='file'
+						accept='.csv'
+						onChange={handleInputChange}
+						style={{ display: 'none' }}
+					/>
+					Выбрать файл
+				</label>
+			</div>
+		</div>
+	)
+}
+
 const ControlPanel = ({
 	onDataChange,
 	onSearchQueryChange,
 	onVisualizationTypeChange,
 	onTreeSettingsChange,
+	data,
 }) => {
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 	const [activeTab, setActiveTab] = useState('layout')
 	const [settings, setSettings] = useState({
-		nodeSize: 20,
-		nodeSpacing: 100,
-		levelHeight: 150,
+		nodeSize: { width: 50, height: 50 },
 		showDetails: true,
 		highlightParents: true,
 		animationDuration: 500,
@@ -55,8 +165,6 @@ const ControlPanel = ({
 		showLabels: true,
 		labelSize: 12,
 		labelColor: '#2c3e50',
-		layoutType: 'vertical',
-		curveType: 'bezier',
 	})
 
 	useEffect(() => {
@@ -70,8 +178,32 @@ const ControlPanel = ({
 		}
 	}, [])
 
+	// Маппинг ключей панели управления на вложенные параметры TREE_CONFIG
+	const mapKeyToTreeConfig = (key, value, prevSettings) => {
+		const updated = { ...prevSettings }
+		if (key === 'nodeColor') {
+			updated.colors = {
+				...(updated.colors ?? {}),
+				node: { ...(updated.colors?.node ?? {}), background: value },
+			}
+		} else if (key === 'lineColor') {
+			updated.colors = { ...(updated.colors ?? {}), link: value }
+		} else if (key === 'nodeSize') {
+			updated.nodeSize = { ...updated.nodeSize, width: value, height: value }
+		} else if (key === 'highlightParents') {
+			updated.styles = { ...(updated.styles ?? {}), highlightParents: value }
+		} else if (key === 'showDetails') {
+			updated.styles = { ...(updated.styles ?? {}), showDetails: value }
+		} else if (key === 'animationDuration') {
+			updated.zoom = { ...(updated.zoom ?? {}), animationDuration: value }
+		} else {
+			updated[key] = value
+		}
+		return updated
+	}
+
 	const handleChange = (key, value) => {
-		const newSettings = { ...settings, [key]: value }
+		const newSettings = mapKeyToTreeConfig(key, value, settings)
 		setSettings(newSettings)
 		onTreeSettingsChange(newSettings)
 	}
@@ -87,75 +219,15 @@ const ControlPanel = ({
 		<>
 			<div className='setting-group'>
 				<label>
-					Тип расположения:
-					<select
-						value={settings.layoutType}
-						onChange={e => handleChange('layoutType', e.target.value)}
-					>
-						<option value='vertical'>Вертикальное</option>
-						<option value='horizontal'>Горизонтальное</option>
-						<option value='radial'>Радиальное</option>
-					</select>
-				</label>
-			</div>
-
-			<div className='setting-group'>
-				<label>
-					Тип линий:
-					<select
-						value={settings.curveType}
-						onChange={e => handleChange('curveType', e.target.value)}
-					>
-						<option value='bezier'>Кривые Безье</option>
-						<option value='straight'>Прямые</option>
-						<option value='step'>Ступенчатые</option>
-					</select>
-				</label>
-			</div>
-
-			<div className='setting-group'>
-				<label>
 					Размер узла:
 					<input
 						type='range'
 						min='10'
 						max='50'
-						value={settings.nodeSize}
+						value={settings.nodeSize.width}
 						onChange={e => handleChange('nodeSize', parseInt(e.target.value))}
 					/>
-					<span>{settings.nodeSize}px</span>
-				</label>
-			</div>
-
-			<div className='setting-group'>
-				<label>
-					Расстояние между узлами:
-					<input
-						type='range'
-						min='50'
-						max='200'
-						value={settings.nodeSpacing}
-						onChange={e =>
-							handleChange('nodeSpacing', parseInt(e.target.value))
-						}
-					/>
-					<span>{settings.nodeSpacing}px</span>
-				</label>
-			</div>
-
-			<div className='setting-group'>
-				<label>
-					Высота уровня:
-					<input
-						type='range'
-						min='100'
-						max='300'
-						value={settings.levelHeight}
-						onChange={e =>
-							handleChange('levelHeight', parseInt(e.target.value))
-						}
-					/>
-					<span>{settings.levelHeight}px</span>
+					<span>{settings.nodeSize.width}px</span>
 				</label>
 			</div>
 		</>
@@ -319,98 +391,70 @@ const ControlPanel = ({
 		}
 	}
 
-	const buildHierarchy = flatData => {
-		const root = { name: 'Сотрудники', children: [] }
-		const levels = [
-			'ЮЛ',
-			'Локация',
-			'Подразделение',
-			'Отдел',
-			'Группа',
-			'Должность',
-			'ФИО',
-		]
-
-		flatData.forEach(row => {
-			let current = root
-			levels.forEach(level => {
-				let value = row[level] ? row[level].trim() : ''
-				if (!value) return
-				let child = current.children.find(d => d.name === value)
-				if (!child) {
-					child = { name: value, children: [] }
-					current.children.push(child)
-				}
-				current = child
-			})
-			current.details = {
-				'Номер позиции': row['Номер позиции'],
-				'Тип работы': row['Тип работы'],
-			}
-		})
-		return root
-	}
-
 	return (
-		<div className='control-panel'>
-			<div className='control-panel-header'>
-				<h2>Управление визуализацией</h2>
-				<button
-					className='settings-toggle'
-					onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-				>
-					{isSettingsOpen ? 'Скрыть настройки' : 'Показать настройки'}
-					<SettingsIcon />
-				</button>
-			</div>
-			{isSettingsOpen && (
-				<div className='control-panel-content'>
-					<div className='control-group'>
-						<label className='file-upload'>
-							<input type='file' onChange={handleFileUpload} accept='.csv' />
-							<span>Загрузить CSV</span>
-						</label>
-					</div>
-					<div className='control-group'>
-						<input
-							type='text'
-							onChange={e => onSearchQueryChange(e.target.value)}
-							placeholder='Поиск...'
-							className='search-input'
-						/>
-					</div>
-					<div className='control-group'>
-						<select
-							onChange={e => onVisualizationTypeChange(e.target.value)}
-							className='visualization-select'
-						>
-							<option value='tree'>Древовидная</option>
-							<option value='radial'>Радиальная</option>
-						</select>
-					</div>
-					<div className='settings-section'>
-						<div className='settings-header'>
-							<h3 className='settings-title'>Настройки дерева</h3>
-						</div>
-						<div className='settings-tabs'>
-							{tabs.map(tab => (
-								<div
-									key={tab.id}
-									className={`settings-tab ${
-										activeTab === tab.id ? 'active' : ''
-									}`}
-									onClick={() => setActiveTab(tab.id)}
-								>
-									{tab.icon}
-									{tab.label}
-								</div>
-							))}
-						</div>
-						<div className='settings-content'>{renderContent()}</div>
-					</div>
+		<>
+			{!data && <WelcomeModal onFileLoaded={onDataChange} />}
+			<div className='control-panel'>
+				<div className='control-panel-header'>
+					<h2>Управление визуализацией</h2>
+					<button
+						className='settings-toggle'
+						onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+					>
+						{isSettingsOpen ? 'Скрыть настройки' : 'Показать настройки'}
+						<SettingsIcon />
+					</button>
 				</div>
-			)}
-		</div>
+				{isSettingsOpen && (
+					<div className='control-panel-content'>
+						<div className='control-group'>
+							<label className='file-upload'>
+								<input type='file' onChange={handleFileUpload} accept='.csv' />
+								<span>Загрузить CSV</span>
+							</label>
+						</div>
+						<div className='control-group'>
+							<input
+								type='text'
+								onChange={e => onSearchQueryChange(e.target.value)}
+								placeholder='Поиск...'
+								className='search-input'
+							/>
+						</div>
+						<div className='control-group'>
+							<select
+								onChange={e => onVisualizationTypeChange(e.target.value)}
+								className='visualization-select'
+							>
+								<option value='tree'>Древовидная</option>
+								<option value='radial'>Радиальная</option>
+								<option value='network'>Network (vis-network)</option>
+							</select>
+						</div>
+						<div className='settings-section'>
+							<div className='settings-header'>
+								<h3 className='settings-title'>Настройки дерева</h3>
+							</div>
+							<div className='settings-tabs'>
+								{tabs.map(tab => (
+									<div
+										key={tab.id}
+										className={`settings-tab ${
+											activeTab === tab.id ? 'active' : ''
+										}`}
+										onClick={() => setActiveTab(tab.id)}
+									>
+										{tab.icon}
+										{tab.label}
+									</div>
+								))}
+							</div>
+							<div className='settings-content'>{renderContent()}</div>
+						</div>
+					</div>
+				)}
+			</div>
+		</>
 	)
 }
 

@@ -316,3 +316,67 @@
     background: white;
     cursor: pointer;
 }
+
+.welcome-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(2px);
+}
+
+.welcome-modal-content {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(52, 152, 219, 0.1);
+    padding: 2.5rem 2.5rem 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+    min-width: 340px;
+    max-width: 90vw;
+    border: 1.5px solid #e6f3ff;
+    transition: box-shadow 0.2s;
+}
+
+.welcome-modal-icon {
+    margin-bottom: 0.5rem;
+}
+
+.welcome-modal h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.3rem;
+    color: #3498db;
+    font-weight: 700;
+}
+
+.welcome-modal p {
+    margin: 0 0 1.2rem 0;
+    color: #555;
+    font-size: 1rem;
+}
+
+.welcome-modal-upload-btn {
+    background: #3498db;
+    color: #fff;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-block;
+}
+
+.welcome-modal-upload-btn:hover {
+    background: #217dbb;
+}
+
+.welcome-modal.drag-active .welcome-modal-content {
+    box-shadow: 0 0 0 4px #4a90e2;
+    border-color: #4a90e2;
+}

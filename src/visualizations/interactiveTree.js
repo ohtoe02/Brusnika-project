@@ -326,4 +326,9 @@ export class InteractiveTree {
 	render() {
 		this.update()
 	}
+
+	updateSettings(newSettings) {
+		this.settings = { ...this.settings, ...newSettings }
+		this.update()
+	}
 }
