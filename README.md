@@ -1,12 +1,66 @@
-# React + Vite
+# Визуализатор иерархий (React + Vite + D3)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Описание
 
-Currently, two official plugins are available:
+Интерактивное веб-приложение для визуализации иерархических структур (например, оргструктур компаний) с гибкой настройкой отображения и поддержкой загрузки данных из CSV.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Основные функции
 
-## Expanding the ESLint configuration
+- Загрузка иерархии из CSV-файла (поддержка русских заголовков)
+- Визуализация в виде интерактивного дерева и радиального дерева
+- Поиск по узлам
+- Мини-карта пути до выбранного узла
+- Панель управления с настройками:
+  - Тип расположения (вертикальное, горизонтальное, радиальное)
+  - Стиль узлов и связей (цвет, толщина, форма линий)
+  - Анимация (длительность, плавность)
+  - Метки (размер, цвет, отображение)
+- Сохранение пользовательских настроек в localStorage
+- Адаптивная вёрстка, поддержка масштабирования
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Требования
+
+- Node.js >= 18
+- npm >= 9
+- Современный браузер (Chrome, Firefox, Edge)
+
+## Установка и запуск
+
+```bash
+npm install
+npm run dev
+```
+
+- Для сборки production-версии: `npm run build`
+- Для предпросмотра production-сборки: `npm run preview`
+- Для проверки стиля кода: `npm run lint`
+
+## Структура проекта
+
+- `src/components/` — основные React-компоненты (панель управления, визуализации, мини-карта)
+- `src/visualizations/` — логика построения деревьев на D3.js
+- `src/utils/` — утилиты для работы с DOM, деревьями, константы
+- `src/constants/` — параметры визуализации
+- `public/` — статические ресурсы
+
+## Архитектура
+
+- React для UI и управления состоянием
+- D3.js для построения и анимации SVG-деревьев
+- Настройки визуализации передаются через props и сохраняются в localStorage
+- Визуализации реализованы как отдельные компоненты с возможностью расширения
+
+## Креативная фича
+
+**Экспорт визуализации:**
+Планируется добавить кнопку для экспорта текущей визуализации в PNG или SVG прямо из интерфейса.
+
+## TODO
+
+- Реализовать визуализацию Treemap
+- Добавить экспорт в PNG/SVG
+- Улучшить обработку больших иерархий
+
+---
+
+_Проект создан с использованием Vite, React 19, D3 v7. Для вопросов и предложений — создавайте issue._
