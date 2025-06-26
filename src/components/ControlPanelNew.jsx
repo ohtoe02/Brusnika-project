@@ -3,11 +3,6 @@ import { useVisualizationSettings } from '../contexts/VisualizationSettingsConte
 import ActionButton from './ActionButton'
 
 // Иконки для вкладок
-const LayoutIcon = () => (
-	<svg viewBox='0 0 24 24' fill='currentColor'>
-		<path d='M3 3h18v18H3V3zm2 2v14h14V5H5z' />
-	</svg>
-)
 
 
 
@@ -81,7 +76,7 @@ const PRESETS = {
 	}
 }
 
-const ControlPanelNew = ({ onVisualizationTypeChange, data }) => {
+const ControlPanelNew = ({ data }) => {
 	// Используем контекст настроек визуализации
 	const {
 		settings,
@@ -93,7 +88,7 @@ const ControlPanelNew = ({ onVisualizationTypeChange, data }) => {
 
 	// Локальное состояние UI
 	const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-	const [activeTab, setActiveTab] = useState('layout')
+	const [activeTab, setActiveTab] = useState('grid')
 
 	// Функция применения пресета
 	const applyPreset = (presetKey) => {
@@ -113,12 +108,17 @@ const ControlPanelNew = ({ onVisualizationTypeChange, data }) => {
 		console.log('📋 Tab should be changed to:', tabId)
 	}
 
-	// Рендеринг настроек расположения
-	const renderLayoutSettings = () => (
+
+
+	// Рендеринг настроек стиля
+
+
+	// Рендеринг настроек сетки
+	const renderGridSettings = () => (
 		<div className="space-y-4">
 			<div className="flex justify-between items-center">
 				<h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wide">
-					Расположение
+					Сетка
 				</h4>
 				<button
 					onClick={resetSettings}
@@ -128,33 +128,6 @@ const ControlPanelNew = ({ onVisualizationTypeChange, data }) => {
 					Сбросить
 				</button>
 			</div>
-			<div className="p-3 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
-				<label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-					Тип визуализации:
-				</label>
-				<select 
-					className="input w-full"
-					onChange={e => onVisualizationTypeChange && onVisualizationTypeChange(e.target.value)}
-				>
-					<option value='tree'>Дерево</option>
-					<option value='radial'>Радиальное дерево</option>
-					<option value='network'>Сеть</option>
-				</select>
-			</div>
-			
-
-		</div>
-	)
-
-	// Рендеринг настроек стиля
-
-
-	// Рендеринг настроек сетки
-	const renderGridSettings = () => (
-		<div className="space-y-4">
-			<h4 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-wide">
-				Сетка
-			</h4>
 			<div className="space-y-3">
 				{/* Показывать сетку */}
 				<div className="flex items-center p-3 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
@@ -294,12 +267,6 @@ const ControlPanelNew = ({ onVisualizationTypeChange, data }) => {
 	// Вкладки настроек
 	const tabs = [
 		{
-			id: 'layout',
-			label: 'Расположение',
-			icon: LayoutIcon,
-			render: renderLayoutSettings,
-		},
-		{
 			id: 'grid',
 			label: 'Сетка',
 			icon: GridIcon,
@@ -315,7 +282,7 @@ const ControlPanelNew = ({ onVisualizationTypeChange, data }) => {
 
 	const getCurrentTabContent = () => {
 		const currentTab = tabs.find(tab => tab.id === activeTab)
-		return currentTab ? currentTab.render() : renderLayoutSettings()
+		return currentTab ? currentTab.render() : renderGridSettings()
 	}
 
 	if (!data) {

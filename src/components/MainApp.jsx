@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useMemo } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiSearch, FiUpload } from 'react-icons/fi'
 import { HiOutlineCog6Tooth } from 'react-icons/hi2'
@@ -27,9 +27,6 @@ import {
 // Lazy-loaded компоненты
 import {
   InteractiveTreeLazy,
-  RadialTreeLazy,
-  VisNetworkLazy,
-  ControlPanelLazy,
   ControlPanelNewLazy,
   ShortcutHelpModalLazy,
   WelcomeScreenLazy,
@@ -64,9 +61,7 @@ function MainApp() {
 		showWelcomeScreen,
 		setShowWelcomeScreen,
 		currentPath,
-		setCurrentPath,
-		visualizationType,
-		setVisualizationType
+		setCurrentPath
 	} = useUIState()
 	const { dimensions } = useDimensions()
 	const { showSuccess, showInfo } = useToast()
@@ -87,35 +82,7 @@ function MainApp() {
 		return cleanup
 	}, [initializeApp])
 
-	// Мемоизированная функция маппинга настроек для vis-network
-	const mapTreeSettingsToVisOptions = useCallback((settings) => {
-		return {
-			nodes: {
-				color: settings.nodeColor || '#3498db',
-				font: {
-					color: settings.labelColor || '#2c3e50',
-					size: settings.labelSize || 12,
-				},
-				size: settings.nodeSize?.width || 25,
-			},
-			edges: {
-				color: settings.lineColor || '#95a5a6',
-				width: settings.lineWidth || 2,
-			},
-			layout: {
-				improvedLayout: true,
-			},
-			physics: {
-				enabled: true,
-			},
-		}
-	}, [])
 
-	// Мемоизированные опции для vis-network
-	const visNetworkOptions = useMemo(() => 
-		mapTreeSettingsToVisOptions(treeSettings), 
-		[treeSettings, mapTreeSettingsToVisOptions]
-	)
 
 	// Настройка клавиатурных шорткатов
 	useKeyboardShortcuts({
@@ -191,22 +158,7 @@ function MainApp() {
 		}
 	}, [searchValue, performSearch, setSearchValue, setShowSearchBar])
 
-	// Пример данных для vis-network (можно заменить на реальные)
-	const networkData = {
-		nodes: [
-			{ id: 1, label: 'Node 1' },
-			{ id: 2, label: 'Node 2' },
-			{ id: 3, label: 'Node 3' },
-			{ id: 4, label: 'Node 4' },
-			{ id: 5, label: 'Node 5' },
-		],
-		edges: [
-			{ from: 1, to: 3 },
-			{ from: 1, to: 2 },
-			{ from: 2, to: 4 },
-			{ from: 2, to: 5 },
-		],
-	}
+
 
 	// Обработчики для WelcomeScreen
 	const handleWelcomeDataLoaded = useCallback((newData) => {
@@ -265,7 +217,6 @@ function MainApp() {
 									data={data}
 									onDataChange={setData}
 									onSearchQueryChange={setSearchQuery}
-									onVisualizationTypeChange={setVisualizationType}
 									onTreeSettingsChange={updateTreeSettings}
 								/>
 							)}
@@ -348,30 +299,18 @@ function MainApp() {
 						shadow-2xl overflow-hidden
 						transition-all duration-500 ease-in-out
 					`}>
-						{visualizationType === 'tree' ? (
-							<InteractiveTreeLazy
-								data={data}
-								width={dimensions.width}
-								height={dimensions.height}
-								searchQuery={searchQuery}
-								settings={treeSettings}
-								showSearchBar={showSearchBar}
-								setShowSearchBar={setShowSearchBar}
-								setSearchValue={setSearchValue}
-								onPathChange={setCurrentPath}
-								treeInstanceRef={treeInstanceRef}
-							/>
-						) : visualizationType === 'radial' ? (
-							<RadialTreeLazy
-								data={data}
-								width={dimensions.width}
-								height={dimensions.height}
-								searchQuery={searchQuery}
-								settings={treeSettings}
-							/>
-						) : (
-							<VisNetworkLazy data={networkData} options={visNetworkOptions} />
-						)}
+						<InteractiveTreeLazy
+							data={data}
+							width={dimensions.width}
+							height={dimensions.height}
+							searchQuery={searchQuery}
+							settings={treeSettings}
+							showSearchBar={showSearchBar}
+							setShowSearchBar={setShowSearchBar}
+							setSearchValue={setSearchValue}
+							onPathChange={setCurrentPath}
+							treeInstanceRef={treeInstanceRef}
+						/>
 					</div>
 					
 					{/* Полноэкранный лоадер */}

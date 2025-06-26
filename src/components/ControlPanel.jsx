@@ -256,7 +256,6 @@ const WelcomeModal = ({ onFileLoaded }) => {
 
 const ControlPanel = ({
 	onDataChange,
-	onVisualizationTypeChange,
 	onTreeSettingsChange,
 	data,
 }) => {
@@ -406,19 +405,7 @@ const ControlPanel = ({
 					Сбросить
 				</button>
 			</div>
-			<div className="p-3 bg-neutral-50 dark:bg-neutral-700 rounded-lg">
-				<label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-					Тип визуализации:
-				</label>
-				<select 
-					className="input w-full"
-					onChange={e => onVisualizationTypeChange(e.target.value)}
-				>
-					<option value='tree'>Дерево</option>
-					<option value='radial'>Радиальное дерево</option>
-					<option value='network'>Сеть</option>
-				</select>
-			</div>
+
 		</div>
 	)
 

@@ -4,7 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'selector', // Включаем selector стратегию для dark mode
+  darkMode: 'selector',
   theme: {
     extend: {
       colors: {
