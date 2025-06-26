@@ -4,7 +4,7 @@ import { VISUALIZATION_CONSTANTS } from './constants'
 const createNodeId = (() => {
     let counter = 0
     const idMap = new Map()
-    return (node) => {
+    return node => {
         if (!node.id) {
             const key = node.data.name + (node.parent ? node.parent.id : '')
             if (idMap.has(key)) {
@@ -26,7 +26,7 @@ const matchesSearch = (node, searchQuery) =>
 // Расчет ширины узла на основе текста
 const calculateNodeWidth = text => {
     const textWidth = text.length * 8 + VISUALIZATION_CONSTANTS.NODE_PADDING
-    return Math.max(textWidth, VISUALIZATION_CONSTANTS.MIN_NODE_WIDTH)
+    return Math.max(textWidth, VISUALIZATION_CONSTANTS.NODE_WIDTH)
 }
 
 export const NodeUtils = {

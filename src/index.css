@@ -1,69 +1,876 @@
-:root {
-	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-	line-height: 1.5;
-	font-weight: 400;
-	color-scheme: light dark;
-	color: rgba(255, 255, 255, 0.87);
-	background-color: #242424;
-	font-synthesis: none;
+@import "tailwindcss";
+
+/* ===== ГЛОБАЛЬНЫЕ СТИЛИ ДЛЯ ПРЕДОТВРАЩЕНИЯ СКРОЛЛА ===== */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Предотвращаем скролл */
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ===== БАЗОВЫЕ СТИЛИ ДЛЯ УЗЛОВ ДЕРЕВА ===== */
+
+/* Прямоугольники узлов */
+.node-rect {
+  fill: #ffffff;
+  stroke: #2563eb;
+  stroke-width: 2px;
+  filter: drop-shadow(0 2px 8px rgba(37, 99, 235, 0.15));
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Тёмная тема для прямоугольников */
+.dark .node-rect {
+  fill: #374151;
+  stroke: #60a5fa;
+}
+
+/* Текст узлов */
+.node-text {
+  fill: #1f2937;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
 	text-rendering: optimizeLegibility;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+  pointer-events: none;
+  user-select: none;
 }
 
-a {
-	font-weight: 500;
-	color: #646cff;
-	text-decoration: inherit;
+/* Тёмная тема для текста */
+.dark .node-text {
+  fill: #f3f4f6;
 }
 
-a:hover {
-	color: #535bf2;
+/* Связи между узлами */
+.link {
+  fill: none;
+  stroke: #cbd5e1;
+  stroke-width: 2px;
+  stroke-opacity: 0.7;
+  transition: all 0.2s ease;
 }
 
-body {
-	margin: 0;
-	display: flex;
-	place-items: center;
-	min-width: 320px;
-	min-height: 100vh;
+/* Тёмная тема для связей */
+.dark .link {
+  stroke: #6b7280;
 }
 
-h1 {
-	font-size: 3.2em;
-	line-height: 1.1;
+/* ===== СТИЛИ ДЛЯ РАДИАЛЬНОГО ДЕРЕВА ===== */
+
+/* Круги узлов в радиальном дереве */
+.node-circle {
+  fill: #2563eb;
+  stroke: #ffffff;
+  stroke-width: 2px;
+  transition: all 0.2s ease;
 }
 
-button {
-	border-radius: 8px;
-	border: 1px solid transparent;
-	padding: 0.6em 1.2em;
-	font-size: 1em;
-	font-weight: 500;
-	font-family: inherit;
-	background-color: #1a1a1a;
-	cursor: pointer;
-	transition: border-color 0.25s;
+.dark .node-circle {
+  fill: #60a5fa;
+  stroke: #374151;
 }
 
-button:hover {
-	border-color: #646cff;
+/* Наведение на круги */
+.node:hover .node-circle {
+  fill: #3b82f6;
+  r: 6;
+  stroke-width: 3px;
 }
 
-button:focus,
-button:focus-visible {
-	outline: 4px auto -webkit-focus-ring-color;
+.dark .node:hover .node-circle {
+  fill: #93c5fd;
 }
 
-@media (prefers-color-scheme: light) {
-	:root {
-		color: #213547;
-		background-color: #ffffff;
+/* Выделенные узлы в радиальном дереве */
+.node.highlight .node-circle {
+  fill: #f59e0b;
+  stroke: #fbbf24;
+  stroke-width: 3px;
+  r: 6;
+}
+
+.dark .node.highlight .node-circle {
+  fill: #fbbf24;
+  stroke: #f59e0b;
+}
+
+/* ===== СОСТОЯНИЯ УЗЛОВ ===== */
+
+/* Наведение на узел */
+.node:hover .node-rect {
+  fill: #eff6ff;
+  stroke: #3b82f6;
+  stroke-width: 3px;
+  filter: drop-shadow(0 4px 12px rgba(37, 99, 235, 0.25));
+}
+
+.dark .node:hover .node-rect {
+  fill: #1f2937;
+  stroke: #60a5fa;
+}
+
+.node:hover .node-text {
+  fill: #2563eb;
+  font-weight: 600;
+}
+
+.dark .node:hover .node-text {
+  fill: #93c5fd;
+}
+
+/* Свёрнутые узлы */
+.node.collapsed .node-rect {
+  fill: #f1f5f9;
+  stroke: #64748b;
+}
+
+.dark .node.collapsed .node-rect {
+  fill: #1f2937;
+  stroke: #6b7280;
+}
+
+.node.collapsed .node-text {
+  fill: #64748b;
+}
+
+.dark .node.collapsed .node-text {
+  fill: #9ca3af;
+}
+
+/* Корневой узел */
+.node.root-node .node-rect {
+  fill: url(#rootGradient);
+  stroke: #4c51bf;
+  stroke-width: 3px;
+  filter: drop-shadow(0 4px 16px rgba(76, 81, 191, 0.3));
+}
+
+.node.root-node .node-text {
+  fill: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Листовые узлы */
+.node.node--leaf .node-rect {
+  fill: #f8fafc;
+  stroke: #cbd5e1;
+}
+
+.dark .node.node--leaf .node-rect {
+  fill: #111827;
+  stroke: #4b5563;
+}
+
+.node.node--leaf .node-text {
+  fill: #6b7280;
+}
+
+.dark .node.node--leaf .node-text {
+  fill: #d1d5db;
+}
+
+/* Выделение родительских узлов */
+.node.parent-highlight .node-rect {
+  fill: #ecfdf5;
+  stroke: #10b981;
+  stroke-width: 2px;
+  filter: drop-shadow(0 2px 8px rgba(16, 185, 129, 0.2));
+}
+
+.dark .node.parent-highlight .node-rect {
+  fill: #064e3b;
+  stroke: #34d399;
+}
+
+.node.parent-highlight .node-text {
+  fill: #047857;
+  font-weight: 600;
+}
+
+.dark .node.parent-highlight .node-text {
+  fill: #6ee7b7;
+}
+
+/* ===== ГРАДИЕНТЫ ===== */
+
+/* Определяем градиенты для SVG */
+svg defs {
+  position: absolute;
+}
+
+/* ===== АНИМАЦИИ ===== */
+
+@keyframes pulse-highlight {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+}
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+
+/* Мобильные устройства */
+@media (max-width: 768px) {
+  .node-text {
+    font-size: 12px;
+  }
+  
+  .node.root-node .node-text {
+    font-size: 14px;
+  }
+  
+  .node-rect {
+    stroke-width: 1.5px;
+  }
+  
+  .link {
+    stroke-width: 1.5px;
+}
+}
+
+/* Планшеты */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .node-text {
+    font-size: 13px;
+  }
+  
+  .node.root-node .node-text {
+    font-size: 15px;
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+/* Высокий контраст */
+@media (prefers-contrast: high) {
+  .node-rect {
+    stroke-width: 3px;
+  }
+  
+  .node-text {
+    font-weight: 600;
+  }
+  
+  .link {
+    stroke-width: 3px;
+    stroke-opacity: 1;
+}
+}
+
+/* Уменьшенная анимация */
+@media (prefers-reduced-motion: reduce) {
+  .node-rect,
+  .node-text,
+  .link {
+    transition: none;
+  }
+  
+  .pulse-highlight {
+    animation: none;
+  }
+}
+
+/* ===== АНИМАЦИИ ДЛЯ КНОПОК ===== */
+
+/* Эффект ripple для кнопок */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Анимация появления */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
 	}
-	a:hover {
-		color: #747bff;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Анимация исчезновения */
+@keyframes fade-out {
+  from {
+    opacity: 1;
 	}
-	button {
-		background-color: #f9f9f9;
+  to {
+    opacity: 0;
+  }
+}
+
+/* Анимация масштабирования */
+@keyframes scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
 	}
 }
+
+/* ===== ПОДСВЕТКА РЕЗУЛЬТАТОВ ПОИСКА ===== */
+
+/* Основная подсветка результатов поиска */
+.node.search-result .node-rect {
+  stroke: #fbbf24 !important;
+  stroke-width: 2px !important;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5)) !important;
+  animation: search-pulse 2s ease-in-out infinite;
+}
+
+.node.search-result .node-text {
+  fill: #fbbf24 !important;
+  font-weight: 600 !important;
+}
+
+/* Текущий выбранный результат поиска */
+.node.search-current .node-rect {
+  stroke: #ef4444 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.7)) !important;
+  animation: search-current-pulse 1.5s ease-in-out infinite;
+}
+
+.node.search-current .node-text {
+  fill: #ef4444 !important;
+  font-weight: 700 !important;
+}
+
+/* Анимации для поиска */
+@keyframes search-pulse {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.4));
+  }
+  50% {
+    opacity: 0.8;
+    filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6));
+  }
+}
+
+@keyframes search-current-pulse {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.6));
+  }
+  50% {
+    opacity: 0.9;
+    filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8));
+  }
+}
+
+/* Темная тема для поиска */
+.dark .node.search-result .node-rect {
+  stroke: #fbbf24 !important;
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.6)) !important;
+}
+
+.dark .node.search-current .node-rect {
+  stroke: #ef4444 !important;
+  filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8)) !important;
+}
+
+/* ===== УЛУЧШЕННЫЕ СОСТОЯНИЯ УЗЛОВ ===== */
+
+/* ===== ФИНАЛЬНАЯ ПОЛИРОВКА - АНИМАЦИИ И МИКРОИНТЕРАКЦИИ ===== */
+
+/* Улучшенные hover эффекты для узлов */
+.node-hover {
+  transition: all 0.2s ease-out;
+}
+
+.node-hover .node-rect {
+  filter: brightness(1.1) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15)) !important;
+  transition: filter 0.2s ease-out;
+}
+
+/* Плавные переходы для всех элементов дерева */
+.node {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.node text {
+  transition: all 0.2s ease-out;
+}
+
+.node rect {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Анимации для ссылок между узлами */
+.link {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  stroke-opacity: 0.8;
+}
+
+.link:hover {
+  stroke-opacity: 1;
+  stroke-width: 3px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Анимации для кнопок сворачивания */
+.collapse-badge-group {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapse-badge-group:hover {
+  /* Убираем масштабирование, чтобы кнопка не смещалась */
+  transform: none;
+}
+
+.badge-circle {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.badge-count-bg {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Пульсирующая анимация для активных элементов */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.8;
+    filter: brightness(1.1);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Анимация появления элементов */
+@keyframes slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.3s ease-out;
+}
+
+.animate-slide-in-down {
+  animation: slide-in-down 0.3s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.3s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+/* Микроинтеракции для кнопок */
+.interactive-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.interactive-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.interactive-button:active {
+  transform: translateY(0) scale(0.98);
+  transition: transform 0.1s ease-out;
+}
+
+/* Эффект ripple для кнопок */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.ripple:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Улучшенные анимации для поиска */
+.search-highlight {
+  animation: search-highlight 0.6s ease-out;
+}
+
+@keyframes search-highlight {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(251, 191, 36, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Плавные переходы для модальных окон */
+.modal-backdrop {
+  transition: opacity 0.3s ease-out;
+}
+
+.modal-content {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Анимации для загрузки */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 2s linear infinite;
+}
+
+/* Градиентные анимации */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Эффекты для фокуса */
+.focus-ring {
+  transition: all 0.2s ease-out;
+}
+
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+/* Анимации для tooltip */
+.tooltip-enter {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+}
+
+.tooltip-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-exit {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.tooltip-exit-active {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  transition: all 0.15s ease-in;
+}
+
+/* Улучшенные состояния для мобильных устройств */
+@media (hover: none) and (pointer: coarse) {
+  .node:hover {
+    transform: none;
+  }
+  
+  .interactive-button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .node-hover {
+    transform: none;
+  }
+}
+
+/* Анимации для появления элементов интерфейса */
+.ui-element {
+  animation: fade-in-scale 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fade-in-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Эффекты для активных состояний */
+.active-state {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  transform: scale(1.02);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Улучшенные переходы для темной/светлой темы */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===== СТИЛИ ДЛЯ АНАЛИТИКИ ===== */
+.analytics-chart-tooltip {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1000;
+}
+
+.analytics-bar-animation {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.analytics-bar-animation:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+/* ===== СТИЛИ ДЛЯ RANGE SLIDER ===== */
+.range-slider::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+
+.range-slider::-webkit-slider-thumb:hover {
+  background: #2563eb;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.range-slider::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+
+.range-slider::-moz-range-thumb:hover {
+  background: #2563eb;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.range-slider::-webkit-slider-track {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+
+.dark .range-slider::-webkit-slider-track {
+  background: #374151;
+}
+
+.range-slider::-moz-range-track {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  border: none;
+}
+
+.dark .range-slider::-moz-range-track {
+  background: #374151;
+}
+
+/* ===== АНИМАЦИИ ДЛЯ АДМИН-ПАНЕЛИ ===== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-slide-right {
+  animation: slideRight 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* ===== КОНЕЦ ФИНАЛЬНОЙ ПОЛИРОВКИ ===== */
+
