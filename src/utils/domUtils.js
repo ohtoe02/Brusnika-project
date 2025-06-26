@@ -1,4 +1,3 @@
-import * as d3 from 'd3'
 import { TREE_CONFIG } from '../constants/treeConfig'
 
 export class DOMUtils {
@@ -43,21 +42,16 @@ export class DOMUtils {
             .on('mouseout', onMouseOut)
     }
 
+    /**
+     * Вычисляет ширину узла на основе длины текста
+     * @param {string} text - Текст узла
+     * @param {Object} settings - Настройки
+     * @returns {number} Ширина узла
+     */
     static calculateNodeWidth(text, settings = TREE_CONFIG) {
-        // Создаем временный элемент для измерения текста
-        const tempText = document.createElement('span')
-        tempText.style.font = `14px Arial, sans-serif` // Такой же шрифт как у узлов
-        tempText.style.visibility = 'hidden'
-        tempText.style.position = 'absolute'
-        tempText.textContent = text
-        document.body.appendChild(tempText)
-
-        // Получаем ширину текста и добавляем отступы
-        const textWidth = tempText.offsetWidth
-        document.body.removeChild(tempText)
-
-        // Минимальная ширина узла + отступы по бокам
-        return Math.max(settings.nodeSize.width, textWidth + 40)
+        const baseWidth = text.length * 8
+        const padding = 20
+        return Math.max(baseWidth + padding, settings.nodeSize.width)
     }
 
     /**

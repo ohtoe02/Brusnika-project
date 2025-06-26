@@ -1,0 +1,46 @@
+/* Стили для найденных элементов при поиске */
+
+.found-highlight rect,
+.found rect {
+    stroke: #f59e0b !important;
+    stroke-width: 3px !important;
+    fill: #fef3c7 !important;
+    filter: drop-shadow(0 8px 25px rgba(245, 158, 11, 0.3)) !important;
+    animation: pulse-highlight 2s ease-in-out !important;
+}
+
+.found-highlight text,
+.found text {
+    fill: #92400e !important;
+    font-weight: 700 !important;
+}
+
+
+/* Анимация пульсации для найденных элементов */
+
+@keyframes pulse-highlight {
+    0%,
+    100% {
+        opacity: 1;
+        filter: drop-shadow(0 8px 25px rgba(245, 158, 11, 0.3));
+    }
+    50% {
+        opacity: 0.85;
+        filter: drop-shadow(0 12px 35px rgba(245, 158, 11, 0.5));
+    }
+}
+
+
+/* Дополнительные стили для выделения пути поиска */
+
+.search-path rect {
+    stroke: #10b981 !important;
+    stroke-width: 2px !important;
+    stroke-dasharray: 4, 2 !important;
+    fill: #ecfdf5 !important;
+}
+
+.search-path text {
+    fill: #047857 !important;
+    font-weight: 600 !important;
+}
